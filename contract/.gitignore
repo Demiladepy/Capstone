@@ -1,0 +1,7 @@
+# Sui Move
+.sui/
+*.mv
+
+# Build artifacts
+build/
+
