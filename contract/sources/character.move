@@ -6,7 +6,7 @@ use sui::transfer;
 use std::string::{Self, String};
 
 /// Character NFT representing a player
-struct Character has key, store {
+public struct Character has key, store {
     id: UID,
     player: address,
     name: String,

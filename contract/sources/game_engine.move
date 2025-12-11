@@ -13,7 +13,7 @@ const HEADS: u8 = 0;
 const TAILS: u8 = 1;
 
 /// Game state
-struct Game has key {
+public struct Game has key {
     id: UID,
     game_id: u64,
     pool: Coin<SUI>,
@@ -25,21 +25,21 @@ struct Game has key {
 }
 
 /// Player bet information
-struct PlayerBet has store {
+public struct PlayerBet has store {
     player: address,
     side: u8, // 0 for heads, 1 for tails
     amount: u64,
 }
 
 /// Game pool to hold all bets
-struct GamePool has key {
+public struct GamePool has key {
     id: UID,
     active_games: vector<ID>,
     total_games: u64,
 }
 
 /// Global game counter
-struct GameCounter has key {
+public struct GameCounter has key {
     id: UID,
     counter: u64,
 }
@@ -129,17 +129,14 @@ public fun flip_coin(
     assert!(!game.resolved, EGameAlreadyResolved);
     assert!(game.total_bets > 0, EInsufficientFunds);
 
-    // Use transaction hash for randomness (simplified - in production use proper randomness)
-    // Convert transaction hash to bytes and use for randomness
-    let tx_hash = tx_context::tx_hash(ctx);
+    // Use a simple pseudo-random approach based on block height and sender
+    // In production, use Move's randomness module
+    let sender_addr = tx_context::sender(ctx);
+    let addr_bytes = bcs::to_bytes(&sender_addr);
+    let addr_len = vector::length(&addr_bytes);
     
-    // Extract bytes from transaction hash for randomness
-    // Using a simple approach: take the last byte of the hash
-    let hash_bytes = std::bcs::to_bytes(&tx_hash);
-    let hash_len = vector::length(&hash_bytes);
-    
-    let random_byte = if (hash_len > 0) {
-        *vector::borrow(&hash_bytes, hash_len - 1)
+    let random_byte = if (addr_len > 0) {
+        *vector::borrow(&addr_bytes, addr_len - 1)
     } else {
         0
     };
